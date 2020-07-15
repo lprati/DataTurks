@@ -193,6 +193,39 @@ public class DataturksAPIEndPoint {
         }
     }
 
+    @POST
+    @Path("/{version}/{orgName}/getOrgProjects")
+    public OrgProjects getOrgProjects(@NotNull @HeaderParam("secret") String token,
+                                      @NotNull @HeaderParam("key") String key,
+                                      @NotNull @PathParam("orgName") String orgName) {
+
+        String id = Validations.validateAPIAccessGetUidElseThrowException(key, token);
+        String reqLogStr = "API_getOrgProjects: orgName=" + orgName + " uid = " + id;
+        LOG.info(reqLogStr);
+
+        DReqObj reqObj = null;
+        OrgProjects response = null;
+        String orgId = null;
+
+        try {
+            if (orgId == null && orgName != null) {
+                DOrgs orgs = AppConfig.getInstance().getdOrgsDAO().findByNameInternal(orgName);
+                if (orgs != null) {
+                    orgId = orgs.getId();
+                }
+            }
+            reqObj = new DReqObj(id, null);        
+            response =  getOrgProjectsInternal(reqObj, orgId);
+            return response;
+        }
+        catch (Exception e) {
+
+            LOG.error("Error " + reqLogStr + e.toString());
+            EventsLogger.logErrorEvent("d_APIgetOrgProjects");
+            throw e;
+        }
+    }
+
 
 
     @POST
